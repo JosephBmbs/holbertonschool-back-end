@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Write a Python script that, using REST API
    and export data in the JSON format. """
-   
+
 import json
 import requests
 
