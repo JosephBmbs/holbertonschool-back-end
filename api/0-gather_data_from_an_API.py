@@ -1,29 +1,29 @@
 #!/usr/bin/python3
-"""Write a Python script that, using REST API"""
-
-import json
 import requests
 import sys
 
-
 if __name__ == "__main__":
-    api_url = "https://jsonplaceholder.typicode.com"
-    emp_id = sys.argv[1]
+    if len(sys.argv) != 2:
+        print("Usage: {} <employee_id>".format(sys.argv[0]))
+        sys.exit(1)
 
-    res = requests.get("{}/users/{}/todos".format(api_url, emp_id),
-                       params={"_expand": "user"})
-    data = res.json()
-    employee_name = data[0]["user"]["name"]
-    done_tasks_number = 0
-    done_tasks_list = []
-    for task in data:
-        if task["completed"]:
-            done_tasks_number += 1
-            done_tasks_list.append(task)
-    total_tasks = len(data)
+    employee_id = sys.argv[1]
+    base_url = 'https://jsonplaceholder.typicode.com/'
+    user_url = '{}users/{}'.format(base_url, employee_id)
+    tasks_url = '{}todos?userId={}'.format(base_url, employee_id)
 
-    print("Employee {} is done with tasks({}/{}):".format
-          (employee_name, done_tasks_number, total_tasks))
+    try:
+        employee_info = requests.get(user_url).json()
+        tasks_info = requests.get(tasks_url).json()
 
-    for task in done_tasks_list:
-        print("\t {}".format(task["title"]))
+        employee_name = employee_info.get('name')
+        completed_tasks = [task for task in tasks_info if task.get('completed')]
+        total_tasks = len(tasks_info)
+
+        print("Employee {} is done with tasks({}/{}):".format(
+            employee_name, len(completed_tasks), total_tasks))
+
+        for task in completed_tasks:
+            print("\t {}".format(task.get('title')))
+    except ValueError:
+        print("Not a valid JSON response.")
